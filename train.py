@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 batch_size = 128
-num_epochs = 2
+num_epochs = 300
 lr = 0.05
 weight_decay = 5e-4
 momentum = 0.9
@@ -26,6 +26,9 @@ for c in range(10):
     indices.extend(idx)
 subset = torch.utils.data.Subset(train_dataset, indices)
 train_loader = DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=2)
+
+test_dataset = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 # initialize dataloader
 
 model = PapyanCNN().to(device)
@@ -63,6 +66,19 @@ for epoch in range(1, num_epochs + 1):
     acc = correct / total * 100
     print(f"→ Loss={total_loss/total:.4f}, Acc={acc:.2f}%")
 
+    model.eval()
+    correct_test = 0
+    total_test = 0
+    with torch.no_grad():
+        for x, y in test_loader:
+            x, y = x.to(device), y.to(device)
+            out = model(x)
+            preds = out.argmax(dim=1)
+            correct_test += (preds == y).sum().item()
+            total_test += x.size(0)
+    test_acc = correct_test / total_test * 100
+    print(f"→ Test Acc={test_acc:.2f}%")
+
     # 特徴とラベルを保存
     model.eval() # switch to evaluation mode
     all_feats = []
@@ -76,6 +92,11 @@ for epoch in range(1, num_epochs + 1):
 
     feats = torch.cat(all_feats)
     labs = torch.cat(all_labs)
-    torch.save({'features': feats, 'labels': labs,
-                'classifier_weight': model.classifier.weight.detach().cpu()},
+    torch.save({'features': feats,
+                'labels': labs,
+                'classifier_weight': model.classifier.weight.detach().cpu(),
+                'train_loss': total_loss / total,
+                'train_accuracy': acc,
+                'test_accuracy': test_acc
+                },
                 save_dir / f'epoch_{epoch:03d}.pt')

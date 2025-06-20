@@ -1,3 +1,6 @@
+'''
+python3 analyze_nc.py --feature_dir ./features --csv_out result.csv
+'''
 import torch
 import numpy as np
 from pathlib import Path
@@ -9,12 +12,6 @@ def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def compute_nc_metrics(features, labels, classifier_weight=None):
-    '''
-    Compute NC1, NC2, NC3 metrics from feature and label tensors.
-    features: (N, D)
-    labels: (N,)
-    classifier_weight: (C, D) if available
-    '''
     features = features.numpy()
     labels = labels.numpy()
     classes = np.unique(labels)
@@ -35,14 +32,14 @@ def compute_nc_metrics(features, labels, classifier_weight=None):
         sigma_w += ((class_feats - class_means[c]) ** 2).sum()
     nc1 = sigma_w / sigma_t
 
-    # NC2: pairwise cosine similarity between class means
+    # NC2: std of pairwise cosine similarity between class means
     sims = []
     for i in range(C):
-        for j in range(i+1, C):
+        for j in range(i + 1, C):
             sims.append(cosine_similarity(class_means[i], class_means[j]))
     nc2 = np.std(sims)
 
-    # NC3: alignment between classifier weights and class means (if available)
+    # NC3: alignment between classifier weights and class means
     nc3 = None
     if classifier_weight is not None:
         W = classifier_weight.cpu().detach().numpy()
@@ -63,7 +60,7 @@ def main():
     epochs = sorted(feature_dir.glob("epoch_*.pt"))
     print(f"Found {len(epochs)} epochs")
 
-    # モデル重みの取得（任意）
+    # モデル重み（外部）をロード（任意）
     classifier_weight = None
     if args.model_path:
         model_data = torch.load(args.model_path, map_location='cpu')
@@ -75,19 +72,23 @@ def main():
                     classifier_weight = model_data[k]
                     break
 
-    print("Epoch, NC1, NC2, NC3")
+    print("Epoch,TestAcc,TrainAcc,TrainLoss,NC1,NC2,NC3")
     with open(args.csv_out, "w") as f:
-        f.write("Epoch,NC1,NC2,NC3\n")
+        f.write("Epoch,TestAcc,TrainAcc,TrainLoss,NC1,NC2,NC3\n")
         for ep in epochs:
             data = torch.load(ep, map_location='cpu', weights_only=True)
             feats = data['features']
             labs = data['labels']
-
-            # .pt内に分類器が含まれていれば優先して使う
             weight = data.get('classifier_weight', classifier_weight)
+
             nc1, nc2, nc3 = compute_nc_metrics(feats, labs, weight)
-            print(f"{ep.stem},{nc1:.4f},{nc2:.4f},{nc3 if nc3 is not None else 'N/A'}")
-            f.write(f"{ep.stem},{nc1:.4f},{nc2:.4f},{nc3 if nc3 is not None else 'N/A'}\n")
+
+            train_acc = data.get('train_accuracy', 'N/A')
+            train_loss = data.get('train_loss', 'N/A')
+            test_acc = data.get('test_accuracy', 'N/A')
+
+            print(f"{ep.stem},{test_acc},{train_acc},{train_loss},{nc1:.4f},{nc2:.4f},{nc3 if nc3 is not None else 'N/A'}")
+            f.write(f"{ep.stem},{test_acc},{train_acc},{train_loss},{nc1:.4f},{nc2:.4f},{nc3 if nc3 is not None else 'N/A'}\n")
 
 if __name__ == "__main__":
     main()
