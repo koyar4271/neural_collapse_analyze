@@ -3,8 +3,8 @@ def get_config(dataset):
     
     if dataset == 'mnist' or dataset == 'cifar10':
         return {
-            'num_epochs': 350,
-            'lr': 0.25,
+            'num_epochs': 10,
+            'lr': 0.01,
             'weight_decay': 5e-4,
             'momentum': 0.9,
             'lr_milestones': [116, 233],

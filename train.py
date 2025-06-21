@@ -8,6 +8,8 @@ from data import get_dataloaders
 from config import get_config
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if torch.cuda.is_available():
+    print(f"Using GPU: {torch.cuda.get_device_name(0)}")
 
 DATASET = 'mnist'
 config = get_config(DATASET)
