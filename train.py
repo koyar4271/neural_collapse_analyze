@@ -1,37 +1,35 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-import numpy as np
-from model import PapyanCNN
+
 from pathlib import Path
 from tqdm import tqdm
+from data import get_dataloaders
+from config import get_config
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-batch_size = 128
-num_epochs = 300
-lr = 0.05
-weight_decay = 5e-4
-momentum = 0.9
-lr_milestones = [int(num_epochs * 1 / 3), int(num_epochs * 2 / 3)]
 
-transform = transforms.ToTensor() # include normalization
-train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
+DATASET = 'mnist'
+config = get_config(DATASET)
 
-targets = train_dataset.targets.numpy()
-indices = []
-for c in range(10):
-    idx = np.where(targets == c)[0][:5000]  # 5000 images each class
-    indices.extend(idx)
-subset = torch.utils.data.Subset(train_dataset, indices)
-train_loader = DataLoader(subset, batch_size=batch_size, shuffle=True, num_workers=2)
+batch_size = config['batch_size']
+num_epochs = config['num_epochs']
+lr = config['lr']
+weight_decay = config['weight_decay']
+momentum =config['momentum']
+lr_milestones = config['lr_milestones']
 
-test_dataset = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
-# initialize dataloader
+train_loader, test_loader = get_dataloaders(dataset_name=DATASET, batch_size=batch_size)
 
-model = PapyanCNN().to(device)
+if DATASET == 'mnist':
+    from models.MNIST_model import PapyanCNN
+    model = PapyanCNN().to(device)
+elif DATASET == 'cifar10':
+    from models.CIFAR10_model import PapyanResNet18
+    model = PapyanResNet18().to(device)
+else:
+    raise ValueError("Invalid dataset")
+
 criterion = nn.CrossEntropyLoss() # loss function
 optimizer = optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
 # settings of optimization SGD method
