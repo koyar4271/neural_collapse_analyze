@@ -3,4 +3,4 @@ __pycache__/
 csv_*/
 *.pt
 *.csv
-vevn/
+venv/
