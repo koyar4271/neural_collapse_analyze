@@ -34,10 +34,27 @@ def get_dataloaders(dataset_name: str, batch_size=128, num_workers=2, samples_pe
             indices.extend(idx)
         train_dataset = Subset(train_dataset, indices)
 
+    elif dataset_name == 'cifar100':
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5071, 0.4867, 0.4408),
+                                 (0.2675, 0.2565, 0.2761))
+        ])
+        train_set = datasets.CIFAR100(root='./data', train=True, download=True, transform=transform)
+        test_set = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
+
+        targets = np.array(train_dataset.targets)
+        indices = []
+        for c in range(100):
+            idx = np.where(targets == c)[0][:samples_per_class]
+            indices.extend(idx)
+        train_dataset = Subset(train_dataset, indices)
+
     else:
         raise ValueError(f"Unsupported dataset: {dataset_name}")
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     test_loader  = DataLoader(test_dataset,  batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    eval_loader  = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)  # ←追加！
 
-    return train_loader, test_loader
+    return train_loader, test_loader, eval_loader
