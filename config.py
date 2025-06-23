@@ -1,9 +1,9 @@
 def get_config(dataset):
     dataset = dataset.lower()
     
-    if dataset == 'mnist' or dataset == 'cifar10':
+    if dataset in ['mnist', 'cifar10', 'cifar100']:
         return {
-            'num_epochs': 10,
+            'num_epochs': 350,
             'lr': 0.01,
             'weight_decay': 5e-4,
             'momentum': 0.9,
