@@ -1,14 +1,36 @@
 def get_config(dataset):
     dataset = dataset.lower()
     
-    if dataset in ['mnist', 'cifar10', 'cifar100']:
+    if dataset == 'mnist':
         return {
             'num_epochs': 350,
-            'lr': 0.01,
+            'lr': 0.005,
             'weight_decay': 5e-4,
             'momentum': 0.9,
             'lr_milestones': [116, 233],
-            'batch_size': 128
+            'batch_size': 128,
+            'label_smoothing': 0.1
+        }
+    
+    elif dataset == 'cifar10':
+        return {
+            'num_epochs': 350,
+            'lr': 0.001,
+            'weight_decay': 5e-4,
+            'momentum': 0.9,
+            'lr_milestones': [116, 233],
+            'batch_size': 128,
+            'label_smoothing': 0.1
+        }
+    
+    elif dataset == 'cifar100':
+        return {
+            'num_epochs': 350,
+            'lr': 0.001,
+            'weight_decay': 5e-4,
+            'momentum': 0.9,
+            'lr_milestones': [116, 233],
+            'batch_size': 128,'label_smoothing': 0.1
         }
 
     elif dataset == 'imagenet':
@@ -18,7 +40,8 @@ def get_config(dataset):
             'weight_decay': 1e-4,
             'momentum': 0.9,
             'lr_milestones': [150, 225],
-            'batch_size': 256
+            'batch_size': 256,
+            'label_smoothing': 0.1
         }
 
     else:
