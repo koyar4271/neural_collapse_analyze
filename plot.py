@@ -1,5 +1,5 @@
 '''
-python plot.py --csv_path result_cifar10.csv --columns TestAcc NC1 NC3 --save_dir plots/result_cifar10
+python plot.py --csv_path result_cifar10.csv --columns TrainAcc TestAcc NC1 NC2 NC3 --save_dir plots/result_cifar10
 '''
 import pandas as pd
 import matplotlib.pyplot as plt
