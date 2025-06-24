@@ -40,8 +40,8 @@ def get_dataloaders(dataset_name: str, batch_size=128, num_workers=2, samples_pe
             transforms.Normalize((0.5071, 0.4867, 0.4408),
                                  (0.2675, 0.2565, 0.2761))
         ])
-        train_set = datasets.CIFAR100(root='./data', train=True, download=True, transform=transform)
-        test_set = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
+        train_dataset = datasets.CIFAR100(root='./data', train=True, download=True, transform=transform)
+        test_dataset = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform)
 
         targets = np.array(train_dataset.targets)
         indices = []
