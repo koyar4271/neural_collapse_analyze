@@ -121,3 +121,9 @@ for epoch in range(1, num_epochs + 1):
                 'test_accuracy': test_acc
                 },
                 save_dir / f'epoch_{epoch:03d}.pt')
+    
+print("Saving final trained model state...")
+final_model_path = save_dir / "final_model.pt"
+torch.save(model.state_dict(), final_model_path)
+print(f"Model saved to {final_model_path}")
+
