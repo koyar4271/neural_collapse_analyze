@@ -15,7 +15,7 @@ def get_config(dataset):
     elif dataset == 'cifar10':
         return {
             'num_epochs': 350,
-            'lr': 0.001,
+            'lr': 0.075,
             'weight_decay': 5e-4,
             'momentum': 0.9,
             'lr_milestones': [116, 233],
@@ -26,11 +26,12 @@ def get_config(dataset):
     elif dataset == 'cifar100':
         return {
             'num_epochs': 350,
-            'lr': 0.001,
+            'lr': 0.1,
             'weight_decay': 5e-4,
             'momentum': 0.9,
             'lr_milestones': [116, 233],
-            'batch_size': 128,'label_smoothing': 0.1
+            'batch_size': 128,
+            'label_smoothing': 0.1
         }
 
     elif dataset == 'imagenet':
