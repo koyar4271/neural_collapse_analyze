@@ -12,6 +12,28 @@ def get_config(dataset):
             'label_smoothing': 0.1
         }
     
+    elif dataset == 'fashionmnist':
+        return {
+            'num_epochs': 350,
+            'lr': 0.05,
+            'weight_decay': 5e-4,
+            'momentum': 0.9,
+            'lr_milestones': [116, 233],
+            'batch_size': 128,
+            'label_smoothing': 0.1
+        }
+    
+    elif dataset == 'kuzushijimnist' or dataset == 'kmnist':
+        return {
+            'num_epochs': 350,
+            'lr': 0.05,
+            'weight_decay': 5e-4,
+            'momentum': 0.9,
+            'lr_milestones': [116, 233],
+            'batch_size': 128,
+            'label_smoothing': 0.1
+        }
+
     elif dataset == 'cifar10':
         return {
             'num_epochs': 350,

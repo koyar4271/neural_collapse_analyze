@@ -10,7 +10,28 @@ def get_dataloaders(dataset_name: str, batch_size=128, num_workers=2, samples_pe
         train_dataset = datasets.MNIST(root='./data', train=True, transform=transform, download=True)
         test_dataset  = datasets.MNIST(root='./data', train=False, transform=transform, download=True)
 
-        # サブサンプリング（クラスごとに5000枚）
+        targets = train_dataset.targets.numpy()
+        indices = []
+        for c in range(10):
+            idx = np.where(targets == c)[0][:samples_per_class]
+            indices.extend(idx)
+        train_dataset = Subset(train_dataset, indices)
+
+    elif dataset_name == 'fashionmnist':
+        transform = transforms.ToTensor()
+        train_dataset = datasets.FashionMNIST(root='./data', train=True, transform=transform, download=True)
+        test_dataset  = datasets.FashionMNIST(root='./data', train=False, transform=transform, download=True)
+        targets = train_dataset.targets.numpy()
+        indices = []
+        for c in range(10):
+            idx = np.where(targets == c)[0][:samples_per_class]
+            indices.extend(idx)
+        train_dataset = Subset(train_dataset, indices)
+
+    elif dataset_name == 'kuzushijimnist' or dataset_name == 'kmnist':
+        transform = transforms.ToTensor()
+        train_dataset = datasets.KMNIST(root='./data', train=True, transform=transform, download=True)
+        test_dataset  = datasets.KMNIST(root='./data', train=False, transform=transform, download=True)
         targets = train_dataset.targets.numpy()
         indices = []
         for c in range(10):

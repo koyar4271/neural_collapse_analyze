@@ -1,6 +1,6 @@
 '''
 python train.py --dataset mnist --save_directory mnist_exp1
-Supported datasets: 'mnist', 'cifar10', 'cifar100'
+Supported datasets: 'mnist', 'fashionmnist', 'kuzushijimnist', 'cifar10', 'cifar100'
 '''
 
 import torch
@@ -25,7 +25,7 @@ parser.add_argument("--save_directory", type=str, default=None,
 args = parser.parse_args()
 
 DATASET = args.dataset.lower()
-assert DATASET in ['mnist', 'cifar10', 'cifar100'], "Unsupported dataset"
+assert DATASET in ['mnist', 'fashionmnist', 'kuzushijimnist', 'kmnist', 'cifar10', 'cifar100'], "Unsupported dataset"
 
 SAVE_DIR = args.save_directory if args.save_directory else DATASET
 
@@ -40,7 +40,7 @@ lr_milestones = config['lr_milestones']
 
 train_loader, test_loader, eval_loader = get_dataloaders(dataset_name=DATASET, batch_size=batch_size)
 
-if DATASET == 'mnist':
+if DATASET in ['mnist', 'fashionmnist', 'kuzushijimnist', 'kmnist']:
     # from models.MNIST_model import PapyanCNN
     from models.MNIST_model_ResNet import ResNet18_MNIST
     # model = PapyanCNN().to(device)
