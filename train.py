@@ -42,9 +42,13 @@ train_loader, test_loader, eval_loader = get_dataloaders(dataset_name=DATASET, b
 
 if DATASET in ['mnist', 'fashionmnist', 'kuzushijimnist', 'kmnist']:
     # from models.MNIST_model import PapyanCNN
-    from models.MNIST_model_ResNet import ResNet18_MNIST
+    # from models.MNIST_model_ResNet import ResNet18_MNIST
     # model = PapyanCNN().to(device)
-    model = ResNet18_MNIST().to(device)
+    # model = ResNet18_MNIST().to(device)
+    # from models.MNIST_model_DenseNet import DenseNet40_MNIST
+    # model = DenseNet40_MNIST().to(device)
+    from models.MNIST_model_VGG import VGG_MNIST
+    model = VGG_MNIST('VGG11').to(device)
 elif DATASET == 'cifar10':
     from models.CIFAR10_model import PapyanResNet18
     model = PapyanResNet18().to(device)
