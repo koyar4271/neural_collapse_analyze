@@ -20,13 +20,13 @@ if torch.cuda.is_available():
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str, required=True,
-                    help="Dataset name: 'mnist', 'cifar10', or 'cifar100'")
+                    help="Dataset name: 'mnist', 'fashion', 'kmnist', 'cifar10', or 'cifar100'")
 parser.add_argument("--save_directory", type=str, default=None,
                     help="Optional subdirectory name under ./features/. Defaults to dataset name if not specified.")
 args = parser.parse_args()
 
 DATASET = args.dataset.lower()
-assert DATASET in ['mnist', 'cifar10', 'cifar100'], "Unsupported dataset"
+assert DATASET in ['mnist', 'fashionmnist', 'kuzushijimnist', 'kmnist', 'cifar10', 'cifar100'], "Unsupported dataset"
 
 SAVE_DIR = args.save_directory if args.save_directory else DATASET
 
@@ -41,7 +41,7 @@ lr_milestones = config['lr_milestones']
 
 train_loader, test_loader, eval_loader = get_dataloaders(dataset_name=DATASET, batch_size=batch_size)
 
-if DATASET == 'mnist':
+if DATASET in ['mnist', 'fashionmnist', 'kuzushijimnist', 'kmnist']:
     # from models.MNIST_model import PapyanCNN
     from models.MNIST_model_ResNet import ResNet18_MNIST
     # model = PapyanCNN().to(device)
@@ -128,3 +128,8 @@ for epoch in range(1, num_epochs + 1):
                 'test_accuracy': test_acc
                 },
                 save_dir / f'epoch_{epoch:03d}.pt')
+    
+print("Saving final trained model state...")
+final_model_path = save_dir / "final_model.pt"
+torch.save(model.state_dict(), final_model_path)
+print(f"Model saved to {final_model_path}")
