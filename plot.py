@@ -1,5 +1,10 @@
 '''
 python plot.py --csv_path result_cifar10.csv --columns TrainAcc TestAcc NC1 NC2 NC3 --save_dir plots/result_cifar10
+python plot.py \
+    --csv_path ./results/result_cifar10.csv \
+    --columns TrainAcc TestAcc NC1 NC2 NC3 \
+    --save_dir plots/result_cifar1 \
+    --vline_epochs 116 233
 '''
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,6 +19,8 @@ def main():
                         help='List of column names to plot')
     parser.add_argument('--save_dir', type=str, required=True,
                         help='Directory to save the output plot images')
+    parser.add_argument('--vline_epochs', type=int, nargs='+', default=None,
+                          help='List of epoch numbers to draw a vertical red line on all plots.')
     args = parser.parse_args()
 
     csv_path = Path(args.csv_path)
@@ -30,6 +37,11 @@ def main():
 
         plt.figure()
         plt.plot(df["Epoch"], df[col], marker='o')
+
+        if args.vline_epochs:
+            for epoch_line in args.vline_epochs:
+                plt.axvline(x=epoch_line, color='r', linestyle='--', linewidth=1.2, label=f'Epoch {epoch_line}')
+        
         plt.xlabel("Epoch")
         plt.ylabel(col)
         plt.title(f"{col} over Epochs")
