@@ -19,7 +19,7 @@ if torch.cuda.is_available():
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str, required=True,
-                    help="Dataset name: 'mnist', 'cifar10', or 'cifar100'")
+                    help="Dataset name: 'mnist', 'fashion', 'kmnist', 'cifar10', or 'cifar100'")
 parser.add_argument("--save_directory", type=str, default=None,
                     help="Optional subdirectory name under ./features/. Defaults to dataset name if not specified.")
 args = parser.parse_args()
