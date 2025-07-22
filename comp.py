@@ -1,36 +1,72 @@
 '''
-python comp.py results/result_mnist_soft.csv results/mnist/result_mnist_005.csv "label-smoothing" "one-hot"
+python comp.py --files results/result_mnist_soft.csv results/mnist/result_mnist_005.csv results/mnist_distill.csv --labels "label-smoothing" "one-hot" "distill"
 '''
 import pandas as pd
 import matplotlib.pyplot as plt
-import sys
+import argparse
+from pathlib import Path
 
-def plot_comparison(file1, file2, label1, label2):
+def plot_comparison(files, labels):
+    """
+    Plots a comparison of specified metrics from multiple CSV files.
 
-    df1 = pd.read_csv(file1)
-    df2 = pd.read_csv(file2)
+    Args:
+        files (list): A list of paths to the CSV files.
+        labels (list): A list of labels for each file.
+    """
+    dataframes = []
+    for file in files:
+        try:
+            df = pd.read_csv(file)
+            # Standardize the 'Epoch' column to be numeric
+            if 'Epoch' in df.columns and isinstance(df['Epoch'].iloc[0], str):
+                df['Epoch'] = df['Epoch'].str.split('_').str[-1].astype(int)
+            df = df.sort_values(by='Epoch')
+            dataframes.append(df)
+        except FileNotFoundError:
+            print(f"Warning: File not found at {file}, skipping.")
+        except (KeyError, AttributeError):
+            print(f"Warning: 'Epoch' column in {file} is not in the expected format, skipping.")
 
-    epochs1 = [int(e.split('_')[1]) for e in df1["Epoch"]]
-    epochs2 = [int(e.split('_')[1]) for e in df2["Epoch"]]
+    if not dataframes:
+        print("No valid data to plot.")
+        return
 
-    metrics = [col for col in df1.columns if col != "Epoch"]
+    # Use the columns from the first valid dataframe as the metrics to plot
+    metrics = [col for col in dataframes[0].columns if col != "Epoch"]
+    
+    # Define markers to cycle through for each line
+    markers = ['o', 's', 'v', '^', '<', '>', 'D', 'p']
 
     for metric in metrics:
-        plt.figure()
-        plt.plot(epochs1, df1[metric], marker='o', label=label1)
-        plt.plot(epochs2, df2[metric], marker='s', label=label2)
-        plt.title(metric)
+        plt.figure(figsize=(10, 6))
+        
+        for i, (df, label) in enumerate(zip(dataframes, labels)):
+            if metric in df.columns:
+                plt.plot(df["Epoch"], df[metric], marker=markers[i % len(markers)], label=label)
+
+        plt.title(metric, fontsize=16)
         plt.xlabel("Epoch")
         plt.ylabel(metric)
         plt.grid(True)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f'{metric}.png')
+        
+        # Save the plot
+        output_dir = Path('./plots/comparisons')
+        output_dir.mkdir(parents=True, exist_ok=True)
+        save_path = output_dir / f'{metric}_comparison.png'
+        plt.savefig(save_path)
         plt.close()
+        print(f"Saved comparison plot: {save_path}")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print("Usage: python comp.py file1.csv file2.csv label1 label2")
+    parser = argparse.ArgumentParser(description="Compare metrics from multiple experiments.")
+    parser.add_argument('--files', nargs='+', required=True, help='A list of paths to the input CSV files.')
+    parser.add_argument('--labels', nargs='+', required=True, help='A list of labels for each corresponding file.')
+    args = parser.parse_args()
+
+    if len(args.files) != len(args.labels):
+        print("Error: The number of files must match the number of labels.")
     else:
-        file1, file2, label1, label2 = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-        plot_comparison(file1, file2, label1, label2)
+        plot_comparison(args.files, args.labels)
